@@ -8,3 +8,11 @@ const html=el('inventory').innerHTML;assert(html.includes('同词条 ×2'));asse
 el('inventory').onchange({target:{dataset:{include:'i0'},checked:false}});assert(saved.items.find(x=>x.id==='i0').excluded);assert.equal(saved.items.length,7);assert(!el('result').innerHTML.includes('已达成目标组合'));
 el('inventory').onclick({target:{closest:()=>({dataset:{edit:'i0'}})}});el('name').value='改名但继续暂停';el('stars').value='1';el('gearform').onsubmit({preventDefault(){}});assert(saved.items.find(x=>x.id==='i0').excluded);
 el('inventory').onchange({target:{dataset:{include:'i0'},checked:true}});assert(el('result').innerHTML.includes('已达成目标组合'));assert(!saved.items.find(x=>x.id==='i0').excluded);console.log('Canonical line order and duplicate grouping, pause/resume in optimizer and simulator, persisted flag, and edits preserving paused state verified.');
+// The new option persists without overwriting the original per-class target counts.
+el('class-any-three').onchange({target:{checked:true}});assert(saved.classAnyThree);assert.equal(saved.classCandidates.length,5);
+for(const id of ['t7','t8'])el('class-candidates').onchange({target:{dataset:{class:id},checked:false}});
+assert.deepEqual(saved.classCandidates,['t4','t5','t6']);assert(el('result').innerHTML.includes('三种不同职业技能'));
+el('class-candidates').onchange({target:{dataset:{class:'t6'},checked:false}});assert(el('result').innerHTML.includes('至少勾选三个'));assert(el('estimate-start').disabled);
+const imported=vm.runInContext('validate(JSON.parse(JSON.stringify(state)))',ctx);assert(imported.classAnyThree);assert.equal(imported.classCandidates.length,2);
+el('class-any-three').onchange({target:{checked:false}});assert(!saved.classAnyThree);assert(saved.types.filter(t=>['t4','t5','t6','t7','t8'].includes(t.id)).every(t=>t.target===1));
+console.log('Class candidate checkbox interaction, invalid selection feedback, saved/imported state, and unchanged original class targets verified.');

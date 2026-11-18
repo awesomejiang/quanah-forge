@@ -23,7 +23,7 @@ function solveOne(items, types, slots) {
 function solve(items,types,slots,options={}){
  const results=rules.variants(types,options).map(v=>solveOne(items,v,slots));
  results.sort((a,b)=>{for(let i=0;i<a.rank.length;i++)if(a.rank[i]!==b.rank[i])return b.rank[i]-a.rank[i];return 0;});
- const best=results[0];if(results.length>1){const {damage,boss}=rules.damageTypes(types);best.damageChoice=best.targets[types.indexOf(boss)]>0?boss.name:damage.name;}return best;
+ const best=results[0];if(options.damageEither){const {damage,boss}=rules.damageTypes(types);if(damage&&boss&&damage.target>0&&boss.target===0)best.damageChoice=best.targets[types.indexOf(boss)]>0?boss.name:damage.name;}if(options.classAnyThree)best.classChoice=rules.classTypes(types).filter(t=>best.targets[types.indexOf(t)]>0).map(t=>t.name);return best;
 }
 if(typeof self!=='undefined'&&typeof document==='undefined')self.onmessage=e=>self.postMessage(solve(...e.data));
 if(typeof module!=='undefined')module.exports=solve;
