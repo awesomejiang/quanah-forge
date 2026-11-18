@@ -48,7 +48,7 @@ export function distribution(stages){
 export function calculateCube(data,o){
  if(!['badge','equipment'].includes(o.profile)||![0,1,2,3].includes(o.current)||![0,1,2,3].includes(o.target)||o.target<o.current)throw Error('目标潜能阶级不能低于当前阶级。');
  if(![140,150,160,200,250].includes(o.level)||!Number.isSafeInteger(o.budget)||o.budget<0)throw Error('请检查装备等级与材料预算。');
- if(o.profile==='badge'&&(o.slot!=='heart'||o.level!==160))throw Error('马牌徽章固定为160级，使用心脏词条池。');
+ if(o.profile==='badge'&&(o.slot!=='heart'||o.level!==160))throw Error('Mapea 吧唧固定为160级，使用心脏词条池。');
  if(!slots[o.slot])throw Error('请选择有效装备部位。');
  if(!Array.isArray(o.conditions)||o.conditions.length>3||o.conditions.some(c=>!metrics[c.metric]||!Number.isFinite(c.amount)||c.amount<=0))throw Error('请检查目标条件。');
  const p=o.conditions.length?probability(data,o):1;
