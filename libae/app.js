@@ -104,7 +104,7 @@ $('export').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,...state
 let estimateWorker=null,estimateLast=null;
 function estimateReady(){
  if(estimateWorker){estimateWorker.terminate();estimateWorker=null;}
- const total=ComboRules.targetTotal(state.types,state),valid=total>0&&total<=18&&(!state.classAnyThree||ComboRules.selectedClasses(state.types,state).length>=3),active=ComboRules.pool(state.types,state);
+ const total=ComboRules.targetTotal(state.types,state),valid=(state.classAnyThree?total>0&&total<=18&&ComboRules.selectedClasses(state.types,state).length>=3:total===18),active=ComboRules.pool(state.types,state);
  $('estimate-pool').innerHTML=active.length?active.map(t=>tag(t.id)).join(''):'<span class="muted">请先设置目标词条</span>';
  $('estimate-start').disabled=!valid;$('estimate-start').textContent='开始估算';$('estimate-stop').hidden=true;
  $('estimate-trials').disabled=false;$('estimate-cap').disabled=false;$('estimate-progress').hidden=true;
