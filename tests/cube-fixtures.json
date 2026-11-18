@@ -1,0 +1,102 @@
+[
+  {
+    "slot": "heart",
+    "level": 160,
+    "target": 3,
+    "conditions": [
+      {
+        "metric": "stat",
+        "amount": 23
+      }
+    ],
+    "p": 0.052752293621431405
+  },
+  {
+    "slot": "weapon",
+    "level": 150,
+    "target": 3,
+    "conditions": [
+      {
+        "metric": "attack",
+        "amount": 21
+      }
+    ],
+    "p": 0.0070979606510397815
+  },
+  {
+    "slot": "weapon",
+    "level": 200,
+    "target": 3,
+    "conditions": [
+      {
+        "metric": "attackLines",
+        "amount": 2
+      },
+      {
+        "metric": "bossLines",
+        "amount": 1
+      }
+    ],
+    "p": 0.00117998648034054
+  },
+  {
+    "slot": "gloves",
+    "level": 160,
+    "target": 3,
+    "conditions": [
+      {
+        "metric": "crit",
+        "amount": 2
+      }
+    ],
+    "p": 0.0025839842919476077
+  },
+  {
+    "slot": "ring",
+    "level": 160,
+    "target": 3,
+    "conditions": [
+      {
+        "metric": "mesoDrop",
+        "amount": 2
+      }
+    ],
+    "p": 0.006081076121379334
+  },
+  {
+    "slot": "hat",
+    "level": 160,
+    "target": 3,
+    "conditions": [
+      {
+        "metric": "cooldown",
+        "amount": 4
+      }
+    ],
+    "p": 0.000625234605809951
+  },
+  {
+    "slot": "heart",
+    "level": 160,
+    "target": 3,
+    "conditions": [
+      {
+        "metric": "hp",
+        "amount": 30
+      }
+    ],
+    "p": 0.0033230462191726796
+  },
+  {
+    "slot": "ring",
+    "level": 140,
+    "target": 3,
+    "conditions": [
+      {
+        "metric": "drop",
+        "amount": 3
+      }
+    ],
+    "p": 0.00000455158852533
+  }
+]
