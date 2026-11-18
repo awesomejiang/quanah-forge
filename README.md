@@ -8,6 +8,7 @@
 - `badge-cube.html`：Mapea 吧唧魔方
 - `equipment.html`：普通装备星力
 - `equipment-cube.html`：普通装备魔方
+- `libae/index.html`：Libae三词条配装、库存及胚子补齐估算
 
 设置保存在浏览器 localStorage，不上传服务器。更换域名后原有设置不会自动转移。
 
@@ -27,3 +28,7 @@ GitHub Settings → Pages → Deploy from a branch，选择 `main` 分支的 `/ 
 - 魔方计算独立实现，沿用参考模型的心脏词条池作为吧唧代理、160级以上数值调整、词条类别限制及社区升阶概率。并非GMS官方完整概率披露。
 
 与Nexon无关联。发布内容不包含ChatGPT Sites身份或部署凭证。
+
+## Libae 配装工具
+
+整合自用户提供的 Libae Combo Lab。原站与本站是不同域名，库存不会跨域自动迁移；可在原站导出JSON备份，再到本站的Libae配装页导入。规则参考页面内链接。
