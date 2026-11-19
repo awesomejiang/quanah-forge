@@ -2,7 +2,7 @@ const assert=require('assert'),rules=require('../rules.js'),solve=require('../so
 const slots=['Hat','Cape','Top','Gloves','Bottom','Shoes'];
 const types=['Dimensional Leap','White Hole','Registry','ATK','Mage','Pirate','Thief','Warrior','Bowman','Crit DMG','Damage','Boss Damage'].map((name,i)=>({id:'t'+i,name,target:i<4?3:i<10?1:0,color:'#abcdef'}));
 const options={classAnyThree:true,classCandidates:['t4','t5','t6','t7']};
-assert.equal(rules.variants(types,options).length,4);assert.equal(rules.targetTotal(types,options),16);assert.equal(rules.variants(types,{}).length,1);
+assert.equal(rules.variants(types,options).length,2);assert.equal(rules.targetTotal(types,options),16);assert.equal(rules.variants(types,{}).length,1);
 for(const v of rules.variants(types,options)){assert.equal(v.filter(t=>['t4','t5','t6','t7'].includes(t.id)&&t.target===1).length,3);assert.equal(v.find(t=>t.id==='t8').target,0)}
 assert.throws(()=>rules.variants(types,{...options,classCandidates:['t4','t5']}),/三个/);
 const reduced=types.map(t=>({...t,target:['t0','t1','t2'].includes(t.id)?1:0}));
@@ -22,5 +22,15 @@ for(let test=0;test<100;test++){
  const result=solve(items,reduced,slots,options);assert.equal(completes(items),result.chosen.length===6&&result.score===result.total);
 }
 // Both group choices compose, rather than dropping one option.
-const withDamage=reduced.map(t=>({...t,target:t.id==='t10'?3:t.target}));assert.equal(rules.variants(withDamage,{...options,damageEither:true}).length,8);
+const withDamage=reduced.map(t=>({...t,target:t.id==='t10'?3:t.target}));assert.equal(rules.variants(withDamage,{...options,damageEither:true}).length,4);
 console.log('Selected candidates only; three distinct classes; duplicate/outside rejection; persistence-compatible options; 100 randomized solver/estimator checks passed.');
+
+const allOptions={classAnyThree:true,classCandidates:['t4','t5','t6','t7','t8']};
+const signatures=rules.classChoices(types,allOptions).map(ids=>ids.sort().join(',')).sort();
+assert.deepEqual(signatures,[['t7','t4','t8'],['t6','t4','t8'],['t7','t5','t8'],['t7','t6','t5'],['t6','t4','t5']].map(ids=>ids.sort().join(',')).sort());
+assert.throws(()=>rules.variants(types,{classAnyThree:true,classCandidates:['t4','t5','t8']}),/五种组合/);
+assert.equal(solve(outside,reduced,slots,allOptions).score,5);
+const allPool=rules.pool(reduced,allOptions),allModels=rules.variants(reduced,allOptions).map(v=>estimate.createModel(v,slots,allPool));
+assert(!allModels.some(m=>estimate.canComplete(m,estimate.inventoryGroups(m,outside))));
+assert.equal(rules.classRuleError(types,{classAnyThree:false,classCandidates:['t4','t5','t8']}),'');
+console.log('Exactly five approved groups; invalid three-candidate selection and disallowed inventory rejected by solver and estimator.');
