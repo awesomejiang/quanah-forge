@@ -18,6 +18,9 @@ body{font-family:"DM Sans","Microsoft YaHei","PingFang SC",sans-serif}h1{letter-
 .equipment-workspace{padding:0}
 .equipment-workspace .setup-fields,.equipment-workspace .plan-content{padding:23px}
 .equipment-workspace .form-actions{padding:0 23px 23px}
+.equipment-workspace .boom-metric{grid-column:1 / -1;border-color:#655134}
+.equipment-workspace .boom-metric small{font-size:14px;color:#c8cfd7}
+.equipment-workspace .boom-metric strong{font-size:34px;color:var(--gold)}
 @media(min-width:801px){
  html[data-profile="equipment"] main{max-width:1680px}
  .equipment-workspace{grid-template-columns:minmax(0,.8fr) minmax(0,1.05fr) minmax(0,1.2fr);gap:16px;height:calc(100vh - 32px);height:calc(100dvh - 32px);align-items:stretch;scroll-margin-top:16px}
