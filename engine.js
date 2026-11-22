@@ -14,11 +14,15 @@ export const defaultCosts=[1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,4,4,5,6,7,8,9];
 const upperCosts={18:[6,12,21,39],19:[7,14,24,45],20:[8,16,28,52],21:[9,18,31,58]};
 const upperSuccess={18:[.1575,.126,.105,.084],19:[.1575,.126,.105,.084],20:[.315,.2625,.21,.1575],21:[.1575,.126,.105,.084]};
 const modeDestroy={15:[.02055,.0137,.00685,0],16:[.02055,.0137,.00685,0],17:[.0674,.042125,.01685,0],18:[.0674,.0437,.0179,0],19:[.08425,.06118,.0358,0],20:[.10275,.07375,.0395,0],21:[.126375,.0874,.04475,0]};
-export function rate(star,mode=1,safeguard=false){
+function baseRate(star,mode=1,safeguard=false){
  if(star<15||star>=22)return {success:success[star],destroy:destroy[star]};
  if(star<=17&&safeguard)return {success:success[star],destroy:0};
  const i=(star<=17?Math.min(mode,3):mode)-1;
  return {success:star>=18?upperSuccess[star][i]:success[star],destroy:modeDestroy[star][i]};
+}
+export function rate(star,mode=1,safeguard=false,destructionEvent=false){
+ const odds=baseRate(star,mode,safeguard);
+ return destructionEvent&&star<=21?{...odds,destroy:odds.destroy*.7}:odds;
 }
 export function attemptCost(star,costs,mode=1,safeguard=false,profile='badge',rounding='nearest'){
  if(profile==='equipment160'||profile==='equipment'){
@@ -53,7 +57,7 @@ export function simulate(options,random=Math.random){
   while(star<target){
    if(++attempts>1000000)throw Error('模拟超出计算上限，请减少模拟次数。');
    const step=planFor(star,options);
-   cost+=attemptCost(star,costs,step.mode,step.safeguard,profile,options.rounding);const r=random(),odds=rate(star,step.mode,step.safeguard);
+   cost+=attemptCost(star,costs,step.mode,step.safeguard,profile,options.rounding);const r=random(),odds=rate(star,step.mode,step.safeguard,options.destructionEvent);
    if(r<odds.success)star++;
    else if(r>=1-odds.destroy){star=resetStar(star);booms++;if(profile!=='badge')cost+=restorationCost;}
   }
@@ -71,7 +75,7 @@ export function exactExpectation(options){
  const restorationCost=profile==='badge'?100:(options.restorationCost??0);
  const money=[],taps=[],booms=[];
  for(let s=0;s<target;s++){
-  const a=planFor(s,options),r=rate(s,a.mode,a.safeguard),reset=resetStar(s);
+  const a=planFor(s,options),r=rate(s,a.mode,a.safeguard,options.destructionEvent),reset=resetStar(s);
   const sum=arr=>r.destroy?arr.slice(reset,s).reduce((x,y)=>x+y,0):0;
   money[s]=(attemptCost(s,costs,a.mode,a.safeguard,profile,rounding)+r.destroy*((profile==='badge'?0:restorationCost)+sum(money)))/r.success;
   taps[s]=(1+r.destroy*sum(taps))/r.success;

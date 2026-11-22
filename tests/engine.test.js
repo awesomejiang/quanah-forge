@@ -29,3 +29,36 @@ test('high star optional distribution remains exact only',async()=>{const {calcu
 test('bulk mode 4 plus safeguard produces legal 30-star strategy',async()=>{const {normalizePlan,calculate,equipmentCosts}=await import('../engine.js');const initial=Array.from({length:30},(_,s)=>({mode:1,safeguard:s>=15&&s<=17})),starPlan=normalizePlan(initial,4);for(let s=0;s<30;s++){assert.equal(starPlan[s].mode,s>=18&&s<=21?4:1);assert.equal(starPlan[s].safeguard,s>=15&&s<=17);}const r=calculate({...base,current:0,target:30,costs:equipmentCosts(200),profile:'equipment',level:200,restorationCost:0,starPlan,includeDistribution:true});assert.ok(Number.isFinite(r.mean));assert.equal(r.crystals,0);assert.equal(r.analytic,true)});
 test('old invalid high-star mode choices are repaired without discarding valid rows',async()=>{const {normalizePlan}=await import('../engine.js');const saved=Array.from({length:30},()=>({mode:4,safeguard:false}));saved[15]={mode:4,safeguard:true};const fixed=normalizePlan(saved);assert.deepEqual(fixed[15],{mode:1,safeguard:true});assert.equal(fixed[16].mode,3);assert.equal(fixed[21].mode,4);assert.equal(fixed[22].mode,1);assert.equal(fixed[29].mode,1);});
 test('default material costs use nearest-integer rounding',async()=>{const {attemptCost,equipmentCosts}=await import('../engine.js');assert.equal(attemptCost(15,equipmentCosts(160),2,false,'equipment'),56);assert.equal(attemptCost(19,equipmentCosts(160),3,false,'equipment'),235);assert.equal(attemptCost(15,Array(22).fill(3),2,false,'badge'),5);});
+
+test('Sunday destruction event scales all eligible modes without changing success or protected rates',()=>{
+ for(let s=0;s<30;s++)for(let m=1;m<=(s<15||s>=22?1:s<18?3:4);m++){
+  const normal=rate(s,m),event=rate(s,m,false,true);
+  assert.equal(event.success,normal.success);
+  assert.equal(event.destroy,normal.destroy*(s<=21?.7:1));
+  assert.ok(event.success+event.destroy<=1);
+ }
+ assert.equal(rate(17,1,true,true).destroy,0);
+ assert.equal(rate(21,4,false,true).destroy,0);
+ assert.deepEqual(rate(22,1,false,true),rate(22));
+});
+test('Sunday simulation converts a prevented destruction into a maintained failure and charges full price',()=>{
+ const options={...base,current:15,target:16,costs:Array(22).fill(10),destructionEvent:true};
+ let rolls=[.982,0];const event=simulate(options,()=>rolls.shift());
+ assert.equal(event.booms,0);assert.equal(event.attempts,2);assert.equal(event.mean,20);
+ rolls=[.982,0,0,0,0];const normal=simulate({...options,destructionEvent:false},()=>rolls.shift());
+ assert.equal(normal.booms,1);assert.equal(normal.attempts,5);assert.equal(normal.mean,50);
+});
+test('Sunday exact expectations satisfy independent first-step equations including high-star restoration',async()=>{
+ const {exactExpectation,equipmentCosts,attemptCost}=await import('../engine.js');
+ const options={current:0,target:24,profile:'equipment',level:160,costs:equipmentCosts(160),destructionEvent:true};
+ const values=Array.from({length:25},(_,current)=>current===24?{mean:0,booms:0}:exactExpectation({...options,current}));
+ for(let s=0;s<24;s++){
+  const normal=rate(s),success=normal.success,destroy=normal.destroy*(s<=21?.7:1),failure=1-success-destroy,reset=resetStar(s);
+  const mean=attemptCost(s,options.costs,1,false,'equipment','nearest')+success*values[s+1].mean+failure*values[s].mean+destroy*values[reset].mean;
+  const booms=success*values[s+1].booms+failure*values[s].booms+destroy*(1+values[reset].booms);
+  assert.ok(Math.abs(mean-values[s].mean)<1e-6);
+  assert.ok(Math.abs(booms-values[s].booms)<1e-8);
+ }
+ const baseline=exactExpectation({...options,destructionEvent:false});
+ assert.ok(values[0].mean<baseline.mean);assert.ok(values[0].booms<baseline.booms);
+});
