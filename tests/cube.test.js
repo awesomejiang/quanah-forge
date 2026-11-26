@@ -10,3 +10,22 @@ test('no upgrade and no line condition has zero cost and probability one',()=>{c
 test('unreachable target and unsupported line tables are not silently substituted',()=>{assert.equal(calculateCube(data,{...base,current:3,conditions:[{metric:'crit',amount:1}]}).unreachable,true);assert.throws(()=>calculateCube(data,{...base,target:1,conditions:[{metric:'stat',amount:6}]}));assert.throws(()=>calculateCube(data,{...base,current:3,target:2}));});
 test('DMT doubles only tier-up rates; target tier remains four fragments',()=>{const r=calculateCube(data,{...base,current:2,dmt:true,conditions:[{metric:'stat',amount:23}]});assert.equal(r.stages[0].p,.1);assert.equal(r.stages[0].cost,2);assert.equal(r.stages[1].cost,4);assert.equal(r.p,probability(data,{...base,conditions:[{metric:'stat',amount:23}]}));});
 test('160+ adjustments and Black Cube prime-line pools remain distinct',()=>{const low=poolsFor(data,'heart',3,150),high=poolsFor(data,'heart',3,160);assert.equal(high[0].find(l=>l[0]==='STR %')[1],low[0].find(l=>l[0]==='STR %')[1]+1);assert.notDeepEqual(high[0],high[1]);assert.notDeepEqual(high[1],high[2]);});
+
+test('duplicate stat-line conditions add their counts, including alongside cooldown',()=>{
+ const options={slot:'hat',target:3,level:160};
+ const one={metric:'statLines',amount:1},cooldown={metric:'cooldown',amount:2};
+ const repeated=probability(data,{...options,conditions:[cooldown,one,one]});
+ const combined=probability(data,{...options,conditions:[cooldown,{metric:'statLines',amount:2}]});
+ const single=probability(data,{...options,conditions:[cooldown,one]});
+ assert.equal(repeated,combined);assert.ok(repeated>0&&repeated<single);
+ const result=calculateCube(data,{...base,...options,profile:'equipment',current:3,conditions:[cooldown,one,one]});
+ assert.equal(result.p,combined);assert.equal(result.meanCost,20/combined);
+});
+test('repeated conditions sum amounts without mutating saved inputs and reject four requested lines',()=>{
+ const conditions=[{metric:'statLines',amount:1},{metric:'statLines',amount:2}];
+ const original=JSON.stringify(conditions),options={slot:'heart',target:3,level:160};
+ assert.equal(probability(data,{...options,conditions}),probability(data,{...options,conditions:[{metric:'statLines',amount:3}]}));
+ assert.equal(JSON.stringify(conditions),original);
+ assert.equal(calculateCube(data,{...base,current:3,conditions:[{metric:'statLines',amount:2},{metric:'statLines',amount:2}]}).unreachable,true);
+ assert.equal(probability(data,{...options,conditions:[{metric:'stat',amount:12},{metric:'stat',amount:11}]}),probability(data,{...options,conditions:[{metric:'stat',amount:23}]}));
+});

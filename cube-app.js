@@ -1,4 +1,4 @@
-import {slots,metrics,availableMetrics} from './cube-engine.js';
+import {slots,metrics,availableMetrics} from './cube-engine.js?v=conditions-sum-1';
 const $=id=>document.getElementById(id),badge=document.documentElement.dataset.cubeProfile==='badge',unit=badge?'Mapea 碎片':'Quanah 水晶',key=badge?'mapae-cube-settings-v1':'quanah-cube-settings-v1',tierNames=['稀有（Rare）','史诗（Epic）','独特（Unique）','传说（Legendary）'];
 const fmt=(v,d=2)=>v===null?'超出范围':new Intl.NumberFormat('zh-CN',{maximumFractionDigits:d}).format(v),pct=v=>`${fmt(v*100,6)}%`;
 let settings={};try{settings=JSON.parse(localStorage.getItem(key))??{};}catch{}if(!settings||typeof settings!=='object')settings={};
@@ -31,7 +31,7 @@ for(const id of ['slot','cube-level','tier-current','tier-target'])$(id).onchang
 for(const row of rows){row.select.onchange=()=>{row.amount.disabled=row.select.value==='none';save();};row.amount.oninput=save;}
 $('cube-budget').oninput=save;$('cube-dmt').onchange=save;
 $('cube-form').onsubmit=event=>{
- event.preventDefault();const o=options();save();$('cube-error').textContent='';$('cube-run').disabled=true;$('cube-run').textContent='精确计算中…';$('cube-status').textContent='正在枚举词条组合';worker?.terminate();worker=new Worker('./cube-worker.js',{type:'module'});
+ event.preventDefault();const o=options();save();$('cube-error').textContent='';$('cube-run').disabled=true;$('cube-run').textContent='精确计算中…';$('cube-status').textContent='正在枚举词条组合';worker?.terminate();worker=new Worker('./cube-worker.js?v=conditions-sum-1',{type:'module'});
  const finish=()=>{$('cube-run').disabled=false;$('cube-run').textContent='计算潜能方案';worker.terminate();};
  worker.onmessage=({data:message})=>{finish();if(message.error){$('cube-error').textContent=message.error;$('cube-status').textContent='请检查设置';return;}if(message.result.unreachable){$('cube-error').textContent='在当前词条表中，这组条件无法同时达成。请调整目标条件。';$('cube-status').textContent='目标不可达';$('cube-result').hidden=true;$('cube-empty').hidden=false;last=null;return;}last={options:o,...message.result};render(last);};
  worker.onerror=()=>{finish();$('cube-error').textContent='计算未能完成，请刷新页面后重试。';$('cube-status').textContent='计算失败';};worker.postMessage(o);

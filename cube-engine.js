@@ -18,6 +18,10 @@ export function valueFor(outcome,metric){
 }
 export function probability(data,{slot,target,level,conditions}){
  if(!conditions.length)return 1;
+ // Repeated metrics request additional value, rather than reusing the same line.
+ const totals=new Map();
+ for(const {metric,amount} of conditions)totals.set(metric,(totals.get(metric)??0)+amount);
+ conditions=Array.from(totals,([metric,amount])=>({metric,amount}));
  const useful=new Set(conditions.flatMap(c=>labels[c.metric]??[]));const pools=poolsFor(data,slot,target,level).map(pool=>{
   let junk=0;const kept=[];for(const line of pool)if(useful.has(line[0])||limits[line[0]])kept.push(line);else junk+=line[2];if(junk)kept.push(['Junk',0,junk]);return kept;
  });
